@@ -40,29 +40,8 @@
 <body>
     <nav class="navbar navbar-default" style="background-color: lightgrey;">
         <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            </button>
-            <a id="title_" class="navbar-brand">Stock Prediction using Linear Regression</a>
-            </div>
-    
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <!-- <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-    
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="index.html">Stock Analysis</a></li>
-            <li class='active'><a href="index.html">Stock Analysis</a></li>
-            <li><a href="index.html">Stock Analysis</a></li>
-          </ul>
-        </div> -->
-      <!-- /.navbar-collapse -->
-      </div>
-    <!-- /.container-fluid -->
+            <a id="title_" class="navbar-brand">Stock Prediction</a>
+        </div>
     </nav>
     <script>
         d3.select('body')
@@ -70,8 +49,10 @@
         .text('Select Stock');
     
         var data = {{data|tojson}};
-        var acc = {{acc|tojson}}
-        var act = {{act|tojson}}
+        var acc = {{acc|tojson}};
+        var act = {{act|tojson}};
+        var names = {{names|tojson}};
+        var sent = {{sent|tojson}};
 
         d3.select("body")
         .append("select")
@@ -83,7 +64,7 @@
         .text(function(d) {return d;})
         .attr("value", function(d) {
             return data[d];
-            })
+            });
 
         function graphSomething(stockName) {
             var stocks = Object.keys(data[0]);
@@ -107,7 +88,6 @@
 
             var gd = gd3.node();    
             
-            var stock = [];
             var score = [];
             var predicted = [];
             var date = [];
@@ -116,17 +96,13 @@
                 var dt = data[j];
                 for (var i = 0; i < stocks.length; i++) {
                     if (stocks[i] == stockName) {
-                        stock.push(stocks[i]);
                         date.push(dt['Date']);
-                        predicted.push(dt[stocks[i]]);
+                        predicted.push(dt[stocks[i]].toFixed(2));
                         score.push(parseFloat(acc[stocks[i]]));
-                        actual.push(parseFloat(act[j][stocks[i]]));
+                        actual.push(parseFloat(act[j][stocks[i]]).toFixed(2));
                     };
                 };
             };
-            // console.log(date);
-            // console.log(predicted);
-            // console.log(actual);
             Plotly.plot(gd, [{
                 x: date,
                 y: predicted,
@@ -140,7 +116,7 @@
                 type: 'scatter',
                 name: 'Actual'
                 }], {
-                title: 'Accuracy Score for ' + stockName + ' is ' + (score[0]*100).toFixed(2) + '%',
+                title: 'Accuracy Score for ' + names[stockName] + ' is ' + (score[0]*100).toFixed(2) + '%',
                 font: {
                     size: 12
                 }
@@ -148,6 +124,9 @@
             window.onresize = function() {  
                 Plotly.Plots.resize(gd);
             };
+            d3.select("body")
+            .append('p')
+            .text(sent[stockName]);
         };        
 
     graphSomething('AAPL');
@@ -155,6 +134,7 @@
     d3.select("#stockPicker")
     .on("change", function(d) {
         var selectedText = d3.select('#stockPicker option:checked').text();
+        d3.select('p').remove();
         graphSomething(selectedText);
     });
     </script>  
